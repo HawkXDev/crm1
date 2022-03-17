@@ -30,8 +30,10 @@ def customer(request, pk):
     return render(request, 'accounts/customer.html', context)
 
 
-def create_order(request):
-    form = OrderForm()
+def create_order(request, pk):
+    customer = Customer.objects.get(id=pk)
+    form = OrderForm(initial={'customer': customer})
+
     if request.method == 'POST':
         # print('Printing POST: ', request.POST)
         form = OrderForm(request.POST)
