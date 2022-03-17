@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.forms import inlineformset_factory
 from .models import Product, Customer, Order
 from .forms import OrderForm
 
@@ -31,17 +32,20 @@ def customer(request, pk):
 
 
 def create_order(request, pk):
+    OrderFormSet = inlineformset_factory(Customer, Order, fields=('product', 'status'), extra=10)
+
     customer = Customer.objects.get(id=pk)
-    form = OrderForm(initial={'customer': customer})
+    formset = OrderFormSet(queryset=Order.objects.none(), instance=customer)
+    # form = OrderForm(initial={'customer': customer})
 
     if request.method == 'POST':
-        # print('Printing POST: ', request.POST)
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            form.save()
+        # form = OrderForm(request.POST)
+        formset = OrderFormSet(request.POST, instance=customer)
+        if formset.is_valid():
+            formset.save()
             return redirect('/')
 
-    context = {'form': form}
+    context = {'formset': formset}
     return render(request, 'accounts/order_form.html', context)
 
 
